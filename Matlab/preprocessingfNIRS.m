@@ -34,6 +34,7 @@ function preprocessingfNIRS(dataprefix, dyads)
 
 rawdir=uigetdir('','Choose Data Directory');
 
+strcat(rawdir,filesep,dataprefix,'*')
 currdir=dir(strcat(rawdir,filesep,dataprefix,'*'));
 if length(currdir)<1
     error(['ERROR: No data files found with ',dataprefix,' prefix']);
@@ -115,16 +116,18 @@ if dyads
                 [oxy2, deoxy2, totaloxy2, z_oxy2, z_deoxy2, z_totaloxy2] = fNIRSFilterPipeline(d2, SD2, samprate);
 
                 mkdir(outpath)
-                save(strcat(outpath,'_subj1_preprocessed.mat'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
-                save(strcat(outpath,'_subj2_preprocessed.mat'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
+                save(strcat(outpath,filesep,'_subj1_preprocessed.mat'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
+                save(strcat(outpath,filesep,'_subj2_preprocessed.mat'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
                 SD=SD1;
                 d=d1;
                 s=s1;
-                save(strcat(outpath,'_subj1.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj1.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj1.mat'),'aux','d','s','SD','t');
                 SD=SD2;
                 d=d2;
                 s=s2;
-                save(strcat(outpath,'_subj2.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj2.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj2.mat'),'aux','d','s','SD','t');
             end
         else
             dyaddir=dir(strcat(rawdir,filesep,dyad,filesep,dataprefix,'*'));
@@ -171,10 +174,12 @@ if dyads
                     d=d1;
                     s=s1;
                     save(strcat(outpath,filesep,scanname,'_subj1.nirs'),'aux','d','s','SD','t');
+                    save(strcat(outpath,filesep,scanname,'_subj1.mat'),'aux','d','s','SD','t');
                     SD=SD2;
                     d=d2;
                     s=s2;
                     save(strcat(outpath,filesep,scanname,'_subj2.nirs'),'aux','d','s','SD','t');
+                    save(strcat(outpath,filesep,scanname,'_subj2.mat'),'aux','d','s','SD','t');
                 end
             end
         end
@@ -186,7 +191,7 @@ else
     fprintf('\n\t Preprocessing ...\n')
     reverseStr = '';
     Elapsedtime = tic;
-    for i=1:length(currdir);
+    for i=1:length(currdir);        
         subj=currdir(i).name;
         subjdir=dir(strcat(rawdir,filesep,subj,filesep,dataprefix,'*'));
         msg = sprintf('\n\t subject number %d/%d ...',i,length(currdir));
@@ -205,7 +210,7 @@ else
                 if probenumchannels~=datanumchannels
                     error('ERROR: number of data channels in hdr file does not match number of channels in probeInfo file.');
                 end
-    
+                
                 %2) identify and remove bad channels
                 satlength = 2; %in seconds
                 QCoDthresh = 0.1;
@@ -220,6 +225,7 @@ else
                 mkdir(outpath) 
                 save(strcat(outpath,filesep,subj,'_preprocessed.mat'),'oxy', 'deoxy', 'totaloxy','z_oxy', 'z_deoxy', 'z_totaloxy');
                 save(strcat(outpath,filesep,subj,'.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,subj,'.mat'),'aux','d','s','SD','t');
             end
         %if there are more than one scan per participant    
         else
@@ -244,14 +250,16 @@ else
                     channelmask = removeBadChannels(d, samprate, satlength, QCoDthresh);
     
                     %3) convert to .nirs format
+                    % [SD, aux, t] = getNirsVars(d, sd_ind, samprate, wavelengths, probeInfo);
                     [SD, aux, t] = getMiscNirsVars(d, sd_ind, samprate, wavelengths, probeInfo, channelmask);
             
                     %4) motion filter, convert to hemodynamic changes
                     [oxy, deoxy, totaloxy, z_oxy, z_deoxy, z_totaloxy] = fNIRSFilterPipeline(d, SD, samprate);
-            
+                    
                     mkdir(outpath) 
                     save(strcat(outpath,filesep,scanname,'_preprocessed.mat'),'oxy', 'deoxy', 'totaloxy','z_oxy', 'z_deoxy', 'z_totaloxy');
                     save(strcat(outpath,filesep,scanname,'.nirs'),'aux','d','s','SD','t');
+                    save(strcat(outpath,filesep,scanname,'.mat'),'aux','d','s','SD','t');
                 end
             end
         end
