@@ -1,5 +1,5 @@
-demo_dyads/*
-demo_singlesubj_multiscan/*
-demo_singlesubj_singlescan/*
+demo_data
+Matlab/homer2
+Matlab/data
 *.m~
 .DS_Store
