@@ -11,8 +11,19 @@ function [oxy, deoxy, totaloxy, z_oxy, z_deoxy, z_totaloxy]= fNIRSFilterPipeline
     %see hmrMotionCorrectPCA in Homer2 documentation for parameter description
     [dfiltered,~,~] = hmrMotionCorrectPCA(SD, d, tInc, 2);
     %see hmrIntensity2Conc in Homer2 documentation for parameter description
-    [dconverted, ~] = hmrIntensity2Conc(dfiltered, SD, samprate, 0.005, 0.5, [6, 6]);
+    
+    %------------------------
+    % COMMENT OUT ONE OF THESE
+    
+    % ENABLES PCA
+    %[dconverted, ~] = hmrIntensity2Conc(dfiltered, SD, samprate, 0.005, 0.5, [6, 6]);
+    % DISABLES PCA
+    [dconverted, ~] = hmrIntensity2Conc(d, SD, samprate, 0.005, 0.5, [6, 6]);
+    %------------------------
+    
     dnormed = zscore(dconverted);
+    %dnormed = dconverted;
+    
     dnormed(:,:,(SD.MeasListAct')==0)=NaN;
     dconverted(:,:,(SD.MeasListAct')==0)=NaN;
     oxy = zeros(length(dconverted), numchannels);

@@ -55,7 +55,7 @@ if dyads
     for i=1:length(currdir);
         dyad=currdir(i).name;
         msg = sprintf('\n\t dyad number %d/%d ...',i,length(currdir));
-        fprintf([reverseStr,msg]);
+        fprintf([,msg]);
         reverseStr = repmat(sprintf('\b'),1,length(msg));      
         if isdir(strcat(rawdir,filesep,dyad,filesep,'Subject1'))
             subj1folder = strcat(rawdir,filesep,dyad,filesep,'Subject1');
@@ -110,6 +110,8 @@ if dyads
                 %3) convert to .nirs format
                 [SD1, ~, ~] = getMiscNirsVars(d1, sd_ind1, samprate, wavelengths, probeInfo, channelmask1);
                 [SD2, aux, t] = getMiscNirsVars(d2, sd_ind2, samprate, wavelengths, probeInfo, channelmask2);
+                %[SD1, ~, ~] = getNirsVars(d1, sd_ind1, samprate, wavelengths, probeInfo);
+                %[SD2, aux, t] = getNirsVars(d2, sd_ind2, samprate, wavelengths, probeInfo);
             
                 %4) motion filter, convert to hemodynamic changes
                 [oxy1, deoxy1, totaloxy1, z_oxy1, z_deoxy1, z_totaloxy1] = fNIRSFilterPipeline(d1, SD1, samprate);
@@ -118,6 +120,8 @@ if dyads
                 mkdir(outpath)
                 save(strcat(outpath,filesep,'_subj1_preprocessed.mat'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
                 save(strcat(outpath,filesep,'_subj2_preprocessed.mat'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
+                save(strcat(outpath,filesep,'_subj1_preprocessed.nirs'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
+                save(strcat(outpath,filesep,'_subj2_preprocessed.nirs'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
                 SD=SD1;
                 d=d1;
                 s=s1;
@@ -162,7 +166,9 @@ if dyads
                     %3) convert to .nirs format
                     [SD1, ~, ~] = getMiscNirsVars(d1, sd_ind1, samprate, wavelengths, probeInfo, channelmask1);
                     [SD2, aux, t] = getMiscNirsVars(d2, sd_ind2, samprate, wavelengths, probeInfo, channelmask2);
-            
+                    %[SD1, ~, ~] = getNirsVars(d1, sd_ind1, samprate, wavelengths, probeInfo);
+                    %[SD2, aux, t] = getNirsVars(d2, sd_ind2, samprate, wavelengths, probeInfo);
+
                     %4) motion filter, convert to hemodynamic changes
                     [oxy1, deoxy1, totaloxy1, z_oxy1, z_deoxy1, z_totaloxy1] = fNIRSFilterPipeline(d1, SD1, samprate);
                     [oxy2, deoxy2, totaloxy2, z_oxy2, z_deoxy2, z_totaloxy2] = fNIRSFilterPipeline(d2, SD2, samprate);
@@ -250,8 +256,8 @@ else
                     channelmask = removeBadChannels(d, samprate, satlength, QCoDthresh);
     
                     %3) convert to .nirs format
-                    % [SD, aux, t] = getNirsVars(d, sd_ind, samprate, wavelengths, probeInfo);
-                    [SD, aux, t] = getMiscNirsVars(d, sd_ind, samprate, wavelengths, probeInfo, channelmask);
+                    [SD, aux, t] = getNirsVars(d, sd_ind, samprate, wavelengths, probeInfo);
+                    % [SD, aux, t] = (d, sd_ind, samprate, wavelengths, probeInfo, channelmask);
             
                     %4) motion filter, convert to hemodynamic changes
                     [oxy, deoxy, totaloxy, z_oxy, z_deoxy, z_totaloxy] = fNIRSFilterPipeline(d, SD, samprate);
