@@ -1,36 +1,78 @@
-% with PCA
-f12_desk = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f12_desk\_subj1_preprocessed.mat');
-f12_desk_og = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f12_desk\_subj1.mat');
-f12_laptop = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f12_laptop\_subj1_preprocessed.mat');
-f12_laptop_og = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f12_laptop\_subj1.mat');
-f13_laptop = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f13_laptop\_subj1_preprocessed.mat');
-f13_laptop_og = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f13_laptop\_subj1.mat');
+%--------------------------------
+%
+% BEFORE RUNNING THIS 
+% 1. Create a directory called 'data' in the 'Matlab' folder.
+% 2. Put all the data folders ("sum_f12_desk", etc.) into the 'data'
+%    folder.
+%
+% During the script:
+% First popup: select 'Matlab/data/'
+% Second popup: select 'Matlab/data/sum_f12_desk/...probeInfo.mat'
+%
+% -------------------------------
 
-% without PCA
-f12_desk_diff = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\sum_f12_desk\_subj1_preprocessed.mat');
+%-------------------------------
+% VARIABLES TO EDIT
 
-%f14_desk = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f14_desk\_subj1_preprocessed.mat');
-%f14_desk_og = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f14_desk\_subj1.mat');
-%f14_laptop = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f14_laptop\_subj1_preprocessed.mat');
-%f14_laptop_og = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f14_laptop\_subj1.mat');
-%f15_desk = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f15_desk\_subj1_preprocessed.mat');
-%f15_desk_og = load('C:\research\scn-lab\preprocessingfNIRS\Matlab\data\PreProcessedFiles\testdata\sum_f15_desk\_subj1.mat');
+processLength = 3;              % number of samples to process in preprocessingfNIRS
+sampleName = 'sum_f12_desk';    % name of sample folder to use
+useSubjNumber = 1;              % use subject 1 or 2
 
-channel = 50;
-medianFilterConstant = 15; 
+%-------------------------------
 
-withPCA = f12_desk.oxy1(:,channel);
-withoutPCA = f12_desk_diff.oxy1(:,channel);
 
-withPCA = medfilt1(withPCA, medianFilterConstant);
+% ==== PREPROCESSING SCRIPT ====
+%
+% generates 2 folders: 
+%   - 'Matlab/data/PreprocessedFiles/withPCA/'
+%   - 'Matlab/data/PreprocessedFiles/withoutPCA'
+% with all of the preprocessed data (one with PCA, one without PCA)
+% once this is run once, it can be commented out.
+    preprocessingfNIRS('sum_', 1, processLength);
+
+if ~exist(rawdir)
+    rawdir=uigetdir('','Choose MATLAB Directory');
+end
+
+% PUT PATH TO PCA
+PCApath = strcat(rawdir,'\data\PreProcessedFiles\withPCA\');
+NoPCApath = strcat(rawdir,'\data\PreProcessedFiles\withoutPCA\');
+
+PCAdir = dir(PCApath);
+noPCAdir = dir(NoPCApath);
+
+if useSubjNumber == 1
+    matrixFilename = '_subj1.mat';
+else
+    matrixFilename = '_subj2.mat';
+end
+
+samplePathPCA = strcat(PCApath,sampleName,'\',matrixFilename);
+samplePathNoPCA = strcat(NoPCApath,sampleName,'\',matrixFilename);
+PCAmatrix = load(samplePathPCA);
+noPCAmatrix = load(samplePathNoPCA);
+
+% DEFINE CONSTANTS
+channel = 15; % select channel(s) to display
+range = 2000:2500; % select range of timepoints to display
+medianFilterConstant = 20; % define neighborhood size for median filtering
+
+% LOAD DATA
+withPCA = f12_desk.oxy1(range,channel);
+withoutPCA = f12_desk_diff.oxy1(range,channel);
+
+% APPLY MEDIAN FILTERING (spike removal)
+%withPCA = medfilt1(withPCA, medianFilterConstant);
 withoutPCA = medfilt1(withoutPCA, medianFilterConstant);
 
+% Z-SCORE
 withPCA = zscore(withPCA);
 withoutPCA = zscore(withoutPCA);
 
-plot(f12_desk_og.t, [withPCA, withoutPCA])
-legend('with PCA', 'w/o PCA');
-corrcoef(f12_desk.oxy1(:,channel), f12_desk_diff.oxy1(:,channel))
+plot(f12_desk_og.t(range), [withPCA, withoutPCA])
+legend(strcat(sampleName,', ',matrixFilename,', with PCA'), strcat(sampleName,', ',matrixFilename,', w/o PCA'));
+corrcoef(withPCA, withoutPCA)
+
 %plot(f12_laptop_og.t, f12_laptop.oxy1(:,channel))
 %plot(f13_laptop_og.t, f13_laptop.oxy1(:,channel))
 

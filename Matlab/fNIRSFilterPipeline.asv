@@ -12,6 +12,9 @@ function [oxy, deoxy, totaloxy, z_oxy, z_deoxy, z_totaloxy]= fNIRSFilterPipeline
     [dfiltered,~,~] = hmrMotionCorrectPCA(SD, d, tInc, 2);
     %see hmrIntensity2Conc in Homer2 documentation for parameter description
     
+    %------------------------
+    % COMMENT OUT ONE OF THESE
+    
     if usePCA == 1 % ENABLES PCA
         [dconverted, ~] = hmrIntensity2Conc(dfiltered, SD, samprate, 0.005, 0.5, [6, 6]);
     else % DISABLES PCA

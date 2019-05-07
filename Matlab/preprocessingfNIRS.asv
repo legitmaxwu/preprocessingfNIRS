@@ -52,13 +52,11 @@ if dyads
     fprintf('\n\t Preprocessing ...\n')
     reverseStr = '';
     Elapsedtime = tic;
-
     lengthToScan = length(currdir);
-    if specifiedLength > 0
+    if specifiedLength >= 0
         lengthToScan = specifiedLength;
     end
-    
-    for i=1:lengthToScan
+    for i=1:lengthToScan;
         dyad=currdir(i).name;
         msg = sprintf('\n\t dyad number %d/%d ...',i,length(currdir));
         fprintf([,msg]);
@@ -69,7 +67,7 @@ if dyads
             
             outpathPCA = strcat(rawdir,filesep,'PreProcessedFiles',filesep,'withPCA',filesep,dyad);
             outpathWithoutPCA = strcat(rawdir,filesep,'PreProcessedFiles',filesep,'withoutPCA',filesep,dyad);
-            if ~exist(outpathPCA,'dir') && ~exist(outpathWithoutPCA,'dir')
+            if ~exist(outpath,'dir')
             
                 %1) extract data values
                 [d1, sd_ind1, ~, ~, s1] = extractNIRxData(subj1folder);
@@ -121,42 +119,24 @@ if dyads
                 %[SD2, aux, t] = getNirsVars(d2, sd_ind2, samprate, wavelengths, probeInfo);
             
                 %4) motion filter, convert to hemodynamic changes
-                [oxy1, deoxy1, totaloxy1, z_oxy1, z_deoxy1, z_totaloxy1] = fNIRSFilterPipeline(d1, SD1, samprate, 1);
-                [oxy2, deoxy2, totaloxy2, z_oxy2, z_deoxy2, z_totaloxy2] = fNIRSFilterPipeline(d2, SD2, samprate, 1);
-                mkdir(outpathPCA)
-                save(strcat(outpathPCA,filesep,'_subj1_preprocessed.mat'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
-                save(strcat(outpathPCA,filesep,'_subj2_preprocessed.mat'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
-                save(strcat(outpathPCA,filesep,'_subj1_preprocessed.nirs'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
-                save(strcat(outpathPCA,filesep,'_subj2_preprocessed.nirs'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
+                [oxy1, deoxy1, totaloxy1, z_oxy1, z_deoxy1, z_totaloxy1] = fNIRSFilterPipeline(d1, SD1, samprate);
+                [oxy2, deoxy2, totaloxy2, z_oxy2, z_deoxy2, z_totaloxy2] = fNIRSFilterPipeline(d2, SD2, samprate);
+
+                mkdir(outpath)
+                save(strcat(outpath,filesep,'_subj1_preprocessed.mat'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
+                save(strcat(outpath,filesep,'_subj2_preprocessed.mat'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
+                save(strcat(outpath,filesep,'_subj1_preprocessed.nirs'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
+                save(strcat(outpath,filesep,'_subj2_preprocessed.nirs'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
                 SD=SD1;
                 d=d1;
                 s=s1;
-                save(strcat(outpathPCA,filesep,'_subj1.nirs'),'aux','d','s','SD','t');
-                save(strcat(outpathPCA,filesep,'_subj1.mat'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj1.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj1.mat'),'aux','d','s','SD','t');
                 SD=SD2;
                 d=d2;
                 s=s2;
-                save(strcat(outpathPCA,filesep,'_subj2.nirs'),'aux','d','s','SD','t');
-                save(strcat(outpathPCA,filesep,'_subj2.mat'),'aux','d','s','SD','t');
-                
-                % NO PCA
-                [oxy1, deoxy1, totaloxy1, z_oxy1, z_deoxy1, z_totaloxy1] = fNIRSFilterPipeline(d1, SD1, samprate, 0);
-                [oxy2, deoxy2, totaloxy2, z_oxy2, z_deoxy2, z_totaloxy2] = fNIRSFilterPipeline(d2, SD2, samprate, 0);
-                mkdir(outpathWithoutPCA)
-                save(strcat(outpathWithoutPCA,filesep,'_subj1_preprocessed.mat'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
-                save(strcat(outpathWithoutPCA,filesep,'_subj2_preprocessed.mat'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
-                save(strcat(outpathWithoutPCA,filesep,'_subj1_preprocessed.nirs'),'oxy1', 'deoxy1', 'totaloxy1','z_oxy1', 'z_deoxy1', 'z_totaloxy1');
-                save(strcat(outpathWithoutPCA,filesep,'_subj2_preprocessed.nirs'),'oxy2', 'deoxy2', 'totaloxy2','z_oxy2', 'z_deoxy2', 'z_totaloxy2');
-                SD=SD1;
-                d=d1;
-                s=s1;
-                save(strcat(outpathWithoutPCA,filesep,'_subj1.nirs'),'aux','d','s','SD','t');
-                save(strcat(outpathWithoutPCA,filesep,'_subj1.mat'),'aux','d','s','SD','t');
-                SD=SD2;
-                d=d2;
-                s=s2;
-                save(strcat(outpathWithoutPCA,filesep,'_subj2.nirs'),'aux','d','s','SD','t');
-                save(strcat(outpathWithoutPCA,filesep,'_subj2.mat'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj2.nirs'),'aux','d','s','SD','t');
+                save(strcat(outpath,filesep,'_subj2.mat'),'aux','d','s','SD','t');
             end
         else
             dyaddir=dir(strcat(rawdir,filesep,dyad,filesep,dataprefix,'*'));
